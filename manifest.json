@@ -1,20 +1,19 @@
 {
-  "name": "روزمرہ دعائیں",
-  "short_name": "دعائیں",
-  "start_url": "/",
+  "name": "Dua App",
+  "short_name": "Dua",
+  "start_url": ".",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#3498db",
+  "background_color": "#fdfdfd",
+  "theme_color": "#db4938",
+  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "icons/icon-192x192.png",
-      "sizes": "192x192",
-      "type": "image/png"
+      "src": "icon-192.png",
+      "type": "image/png", "sizes": "192x192"
     },
     {
-      "src": "icons/icon-512x512.png",
-      "sizes": "512x512",
-      "type": "image/png"
+      "src": "icon-512.png",
+      "type": "image/png", "sizes": "512x512"
     }
   ]
 }
