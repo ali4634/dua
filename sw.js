@@ -1,6 +1,6 @@
 const CACHE_NAME = 'duas-app-v1';
 const urlsToCache = [
-  '/',
+  '.'
   '/index.html',
   '/styles.css',
   '/app.js',
