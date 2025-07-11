@@ -3,7 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- === PWA کے لیے ضروری ٹیگز === -->
+    <meta name="theme-color" content="#3498db"/>
+    <meta name="description" content="روزمرہ کی دعائیں سیکھیں، یاد کریں اور تلاش کریں۔">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    
     <title>روزمرہ دعائیں ایپ</title>
+
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -21,6 +29,8 @@
             padding: 20px;
         }
         h1 {
+            /* اردو کے لیے بہتر فونٹ */
+            font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Pak Nastaleeq', serif;
             color: #2c3e50;
             text-align: center;
             margin-bottom: 30px;
@@ -48,6 +58,7 @@
         }
         .dua-card:hover {
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
         }
         .dua-title {
             font-weight: bold;
@@ -56,7 +67,9 @@
             font-size: 18px;
         }
         .dua-content {
-            font-size: 18px;
+            /* عربی کے لیے بہتر فونٹ */
+            font-family: 'Noto Naskh Arabic', 'Amiri', 'Scheherazade New', serif;
+            font-size: 24px;
             margin: 10px 0;
             line-height: 1.8;
             text-align: center;
@@ -80,6 +93,7 @@
             border-radius: 5px;
             cursor: pointer;
             font-weight: bold;
+            transition: background-color 0.2s;
         }
         .btn-memorized {
             background-color: #2ecc71;
@@ -104,6 +118,7 @@
             border: 1px solid #ddd;
             border-radius: 5px;
             font-size: 16px;
+            box-sizing: border-box;
         }
         .filter-buttons {
             display: flex;
@@ -112,27 +127,17 @@
         }
         .filter-btn {
             flex: 1;
-            padding: 8px;
+            padding: 10px;
             background-color: #ecf0f1;
-            border: none;
+            border: 1px solid #bdc3c7;
             border-radius: 5px;
             cursor: pointer;
+            font-weight: bold;
         }
         .filter-btn.active {
             background-color: #3498db;
             color: white;
-        }
-        #update-notification {
-            display: none;
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            background: #2ecc71;
-            color: white;
-            padding: 15px;
-            border-radius: 5px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
-            z-index: 1000;
+            border-color: #3498db;
         }
         #install-button {
             display: none;
@@ -141,14 +146,18 @@
             left: 20px;
             background: #3498db;
             color: white;
-            padding: 10px 15px;
+            padding: 12px 18px;
             border: none;
-            border-radius: 5px;
+            border-radius: 50px;
             cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            font-size: 16px;
+            z-index: 1000;
         }
     </style>
 </head>
 <body>
+    <!-- آپ کا تمام HTML مواد یہاں سے شروع ہوتا ہے -->
     <div class="container">
         <h1>📿 روزمرہ دعائیں ایپ</h1>
         
@@ -163,236 +172,21 @@
         </div>
         
         <div id="duas-container">
-            <!-- کھانے پینے کی دعائیں -->
-            <div class="category">
-                <div class="category-title">🍽️ کھانے پینے کی دعائیں</div>
-                
-                <div class="dua-card" data-id="1" data-memorized="false" data-favorite="false">
-                    <div class="dua-title">کھانا شروع کرنے کی دعا</div>
-                    <div class="dua-content">بِسْمِ اللهِ وَعَلَى بَرَكَةِ اللهِ</div>
-                    <div class="dua-translation">اللہ کے نام سے اور اللہ کی برکت کے ساتھ</div>
-                    <div class="dua-actions">
-                        <button class="btn btn-memorized">یاد کرنا ہے</button>
-                        <button class="btn btn-favorite">پسندیدہ بنائیں</button>
-                    </div>
-                </div>
-                
-                <div class="dua-card" data-id="2" data-memorized="false" data-favorite="false">
-                    <div class="dua-title">کھانا ختم کرنے کی دعا</div>
-                    <div class="dua-content">الْحَمْدُ للهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَجَعَلْنَا مِنَ الْمُسْلِمِينَ</div>
-                    <div class="dua-translation">تمام تعریفیں اللہ کے لیے ہیں جس نے ہمیں کھلایا پلایا اور ہمیں مسلمان بنایا</div>
-                    <div class="dua-actions">
-                        <button class="btn btn-memorized">یاد کرنا ہے</button>
-                        <button class="btn btn-favorite">پسندیدہ بنائیں</button>
-                    </div>
-                </div>
-                
-                <div class="dua-card" data-id="16" data-memorized="false" data-favorite="false">
-                    <div class="dua-title">دودھ پینے کی دعا</div>
-                    <div class="dua-content">اللَّهُمَّ بَارِكْ لَنَا فِيهِ وَزِدْنَا مِنْهُ</div>
-                    <div class="dua-translation">اے اللہ! ہمارے لیے اس میں برکت دے اور ہمیں اور زیادہ عطا فرما</div>
-                    <div class="dua-actions">
-                        <button class="btn btn-memorized">یاد کرنا ہے</button>
-                        <button class="btn btn-favorite">پسندیدہ بنائیں</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- سونے جاگنے کی دعائیں -->
-            <div class="category">
-                <div class="category-title">🛌 سونے جاگنے کی دعائیں</div>
-                
-                <div class="dua-card" data-id="3" data-memorized="false" data-favorite="false">
-                    <div class="dua-title">سونے کی دعا</div>
-                    <div class="dua-content">اللَّهُمَّ بِاسْمِكَ أَمُوتُ وَأَحْيَا</div>
-                    <div class="dua-translation">اے اللہ! تیرے نام کے ساتھ میں مرتا ہوں اور جیتا ہوں</div>
-                    <div class="dua-actions">
-                        <button class="btn btn-memorized">یاد کرنا ہے</button>
-                        <button class="btn btn-favorite">پسندیدہ بنائیں</button>
-                    </div>
-                </div>
-                
-                <div class="dua-card" data-id="4" data-memorized="false" data-favorite="false">
-                    <div class="dua-title">جاگنے کی دعا</div>
-                    <div class="dua-content">الْحَمْدُ للهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ</div>
-                    <div class="dua-translation">تمام تعریفیں اللہ کے لیے ہیں جس نے ہمیں موت کے بعد زندہ کیا اور اسی کی طرف اٹھنا ہے</div>
-                    <div class="dua-actions">
-                        <button class="btn btn-memorized">یاد کرنا ہے</button>
-                        <button class="btn btn-favorite">پسندیدہ بنائیں</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- گھر اور مسجد کی دعائیں -->
-            <div class="category">
-                <div class="category-title">🏠 گھر اور مسجد کی دعائیں</div>
-                
-                <div class="dua-card" data-id="7" data-memorized="false" data-favorite="false">
-                    <div class="dua-title">گھر میں داخل ہونے کی دعا</div>
-                    <div class="dua-content">اللهمَّ إِنِّي أَسْأَلُكَ خَيْرَ الْمَوْلِجِ وَخَيْرَ الْمَخْرَجِ</div>
-                    <div class="dua-translation">اے اللہ! میں تیرے سے بہترین داخلے اور بہترین نکلنے کا سوال کرتا ہوں</div>
-                    <div class="dua-actions">
-                        <button class="btn btn-memorized">یاد کرنا ہے</button>
-                        <button class="btn btn-favorite">پسندیدہ بنائیں</button>
-                    </div>
-                </div>
-                
-                <div class="dua-card" data-id="8" data-memorized="false" data-favorite="false">
-                    <div class="dua-title">گھر سے نکلنے کی دعا</div>
-                    <div class="dua-content">بِسْمِ اللهِ تَوَكَّلْتُ عَلَى اللهِ وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ</div>
-                    <div class="dua-translation">اللہ کے نام سے، میں نے اللہ پر بھروسہ کیا، اور نہ کوئی طاقت نہ کوئی قوت مگر اللہ کی مدد سے</div>
-                    <div class="dua-actions">
-                        <button class="btn btn-memorized">یاد کرنا ہے</button>
-                        <button class="btn btn-favorite">پسندیدہ بنائیں</button>
-                    </div>
-                </div>
-                
-                <div class="dua-card" data-id="9" data-memorized="false" data-favorite="false">
-                    <div class="dua-title">مسجد میں داخل ہونے کی دعا</div>
-                    <div class="dua-content">اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ</div>
-                    <div class="dua-translation">اے اللہ! میرے لیے اپنی رحمت کے دروازے کھول دے</div>
-                    <div class="dua-actions">
-                        <button class="btn btn-memorized">یاد کرنا ہے</button>
-                        <button class="btn btn-favorite">پسندیدہ بنائیں</button>
-                    </div>
-                </div>
-                
-                <div class="dua-card" data-id="10" data-memorized="false" data-favorite="false">
-                    <div class="dua-title">مسجد سے نکلنے کی دعا</div>
-                    <div class="dua-content">اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ وَرَحْمَتِكَ</div>
-                    <div class="dua-translation">اے اللہ! میں تیرے فضل اور تیری رحمت کا سوال کرتا ہوں</div>
-                    <div class="dua-actions">
-                        <button class="btn btn-memorized">یاد کرنا ہے</button>
-                        <button class="btn btn-favorite">پسندیدہ بنائیں</button>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- دیگر اہم دعائیں -->
-            <div class="category">
-                <div class="category-title">🌟 دیگر اہم دعائیں</div>
-                
-                <div class="dua-card" data-id="5" data-memorized="false" data-favorite="false">
-                    <div class="dua-title">بیت الخلاء جانے کی دعا</div>
-                    <div class="dua-content">اللهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْخُبُثِ وَالْخَبَائِثِ</div>
-                    <div class="dua-translation">اے اللہ! میں تیری پناہ چاہتا ہوں تمام برے مردوں اور عورتوں (شیاطین) سے</div>
-                    <div class="dua-actions">
-                        <button class="btn btn-memorized">یاد کرنا ہے</button>
-                        <button class="btn btn-favorite">پسندیدہ بنائیں</button>
-                    </div>
-                </div>
-                
-                <div class="dua-card" data-id="6" data-memorized="false" data-favorite="false">
-                    <div class="dua-title">بیت الخلاء سے نکلنے کی دعا</div>
-                    <div class="dua-content">الْحَمْدُ للهِ الَّذِي أَذْهَبَ عَنِّي الْأَذَى وَعَافَانِي</div>
-                    <div class="dua-translation">تمام تعریفیں اللہ کے لیے ہیں جس نے مجھ سے تکلیف دور کی اور مجھے عافیت بخشی</div>
-                    <div class="dua-actions">
-                        <button class="btn btn-memorized">یاد کرنا ہے</button>
-                        <button class="btn btn-favorite">پسندیدہ بنائیں</button>
-                    </div>
-                </div>
-                
-                <div class="dua-card" data-id="11" data-memorized="false" data-favorite="false">
-                    <div class="dua-title">سواری پر بیٹھنے کی دعا</div>
-                    <div class="dua-content">سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ وَإِنَّا إِلَى رَبِّنَا لَمُنقَلِبُونَ</div>
-                    <div class="dua-translation">پاک ہے وہ ذات جس نے ہمارے لیے اسے مسخر کیا، ورنہ ہم اس پر قابو نہ پا سکتے، اور ہمیں اپنے رب ہی کی طرف لوٹ کر جانا ہے</div>
-                    <div class="dua-actions">
-                        <button class="btn btn-memorized">یاد کرنا ہے</button>
-                        <button class="btn btn-favorite">پسندیدہ بنائیں</button>
-                    </div>
-                </div>
-                
-                <div class="dua-card" data-id="12" data-memorized="false" data-favorite="false">
-                    <div class="dua-title">سواری سے اترنے کی دعا</div>
-                    <div class="dua-content">رَبِّ انْزِلْنِي مُنْزَلًا مُبَارَكًا وَأَنْتَ خَيْرُ الْمُنْزِلِينَ</div>
-                    <div class="dua-translation">اے میرے رب! مجھے برکت والی جگہ اتار، اور تو سب سے بہتر اتارنے والا ہے</div>
-                    <div class="dua-actions">
-                        <button class="btn btn-memorized">یاد کرنا ہے</button>
-                        <button class="btn btn-favorite">پسندیدہ بنائیں</button>
-                    </div>
-                </div>
-                
-                <div class="dua-card" data-id="13" data-memorized="false" data-favorite="false">
-                    <div class="dua-title">مصیبت کے وقت کی دعا</div>
-                    <div class="dua-content">إِنَّا للهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ</div>
-                    <div class="dua-translation">بے شک ہم اللہ کے لیے ہیں اور ہمیں اسی کی طرف لوٹ کر جانا ہے</div>
-                    <div class="dua-actions">
-                        <button class="btn btn-memorized">یاد کرنا ہے</button>
-                        <button class="btn btn-favorite">پسندیدہ بنائیں</button>
-                    </div>
-                </div>
-                
-                <div class="dua-card" data-id="14" data-memorized="false" data-favorite="false">
-                    <div class="dua-title">لباس پہننے کی دعا</div>
-                    <div class="dua-content">الْحَمْدُ للهِ الَّذِي كَسَانِي مَا أَوَارِي بِهِ عَوْرَتِي وَأَتَجَمَّلُ بِهِ فِي حَيَاتِي</div>
-                    <div class="dua-translation">تمام تعریفیں اللہ کے لیے ہیں جس نے مجھے ایسا لباس پہنایا جس سے میں اپنی شرمگاہوں کو چھپاتا ہوں اور اپنی زندگی میں اس سے زینت اختیار کرتا ہوں</div>
-                    <div class="dua-actions">
-                        <button class="btn btn-memorized">یاد کرنا ہے</button>
-                        <button class="btn btn-favorite">پسندیدہ بنائیں</button>
-                    </div>
-                </div>
-                
-                <div class="dua-card" data-id="15" data-memorized="false" data-favorite="false">
-                    <div class="dua-title">مریض کی عیادت کی دعا</div>
-                    <div class="dua-content">لَا بَأْسَ طَهُورٌ إِنْ شَاءَ اللهِ</div>
-                    <div class="dua-translation">کوئی بیماری نہیں، یہ پاکی ہے ان شاء اللہ</div>
-                    <div class="dua-actions">
-                        <button class="btn btn-memorized">یاد کرنا ہے</button>
-                        <button class="btn btn-favorite">پسندیدہ بنائیں</button>
-                    </div>
-                </div>
-                
-                <div class="dua-card" data-id="17" data-memorized="false" data-favorite="false">
-                    <div class="dua-title">چاند دیکھنے کی دعا</div>
-                    <div class="dua-content">اللَّهُمَّ أَهِلَّهُ عَلَيْنَا بِالْأَمْنِ وَالْإِيمَانِ وَالسَّلَامَةِ وَالْإِسْلَامِ رَبِّي وَرَبُّكَ اللَّهُ</div>
-                    <div class="dua-translation">اے اللہ! اس چاند کو ہم پر امن، ایمان، سلامتی اور اسلام کے ساتھ طلوع فرما، میرا اور تیرا رب اللہ ہے</div>
-                    <div class="dua-actions">
-                        <button class="btn btn-memorized">یاد کرنا ہے</button>
-                        <button class="btn btn-favorite">پسندیدہ بنائیں</button>
-                    </div>
-                </div>
-                
-                <div class="dua-card" data-id="18" data-memorized="false" data-favorite="false">
-                    <div class="dua-title">آئینہ دیکھنے کی دعا</div>
-                    <div class="dua-content">اللَّهُمَّ حَسَّنْتَ خَلْقِي فَحَسِّنْ خُلُقِي</div>
-                    <div class="dua-translation">اے اللہ! جیسے تو نے میرے خلق (صورت) کو خوبصورت بنایا ہے، میرے اخلاق کو بھی خوبصورت بنا دے</div>
-                    <div class="dua-actions">
-                        <button class="btn btn-memorized">یاد کرنا ہے</button>
-                        <button class="btn btn-favorite">پسندیدہ بنائیں</button>
-                    </div>
-                </div>
-                
-                <div class="dua-card" data-id="19" data-memorized="false" data-favorite="false">
-                    <div class="dua-title">روزہ رکھنے کی دعا</div>
-                    <div class="dua-content">وَبِصَوْمِ غَدٍ نَوَيْتُ مِنْ شَهْرِ رَمَضَانَ</div>
-                    <div class="dua-translation">میں نے کل کے روزے کی نیت کی رمضان کے مہینے میں</div>
-                    <div class="dua-actions">
-                        <button class="btn btn-memorized">یاد کرنا ہے</button>
-                        <button class="btn btn-favorite">پسندیدہ بنائیں</button>
-                    </div>
-                </div>
-                
-                <div class="dua-card" data-id="20" data-memorized="false" data-favorite="false">
-                    <div class="dua-title">روزہ افطار کرنے کی دعا</div>
-                    <div class="dua-content">اللَّهُمَّ إِنِّي لَكَ صُمْتُ وَبِكَ آمَنْتُ وَعَلَيْكَ تَوَكَّلْتُ وَعَلَى رِزْقِكَ أَفْطَرْتُ</div>
-                    <div class="dua-translation">اے اللہ! میں نے تیرے لیے روزہ رکھا، تیرے پر ایمان لایا، تجھ پر بھروسہ کیا اور تیرے رزق سے افطار کیا</div>
-                    <div class="dua-actions">
-                        <button class="btn btn-memorized">یاد کرنا ہے</button>
-                        <button class="btn btn-favorite">پسندیدہ بنائیں</button>
-                    </div>
-                </div>
-            </div>
+            <!-- آپ کی دعائیں جاوا اسکرپٹ کے ذریعے یہاں شامل کی جائیں گی -->
         </div>
     </div>
-
-    <div id="update-notification">
-        نیا اپ ڈیٹ دستیاب ہے! <button id="refresh-button">تازہ کریں</button>
-    </div>
-
+    
     <button id="install-button">ایپ انسٹال کریں</button>
 
+    <!-- آپ کا تمام جاوا اسکرپٹ کوڈ یہاں سے شروع ہوتا ہے -->
     <script>
-        // دعاؤں کا ڈیٹا
+        // DOM elements
+        const duasContainer = document.getElementById('duas-container');
+        const searchInput = document.getElementById('search');
+        const filterButtons = document.querySelectorAll('.filter-btn');
+        const installButton = document.getElementById('install-button');
+
+        // آپ کا دعاؤں والا ڈیٹا، اسے یہاں رکھنے کے بجائے علیحدہ بھی رکھا جا سکتا ہے
         const duas = [
             {id: 1, title: "کھانا شروع کرنے کی دعا", arabic: "بِسْمِ اللهِ وَعَلَى بَرَكَةِ اللهِ", translation: "اللہ کے نام سے اور اللہ کی برکت کے ساتھ", category: "🍽️ کھانے پینے کی دعائیں"},
             {id: 2, title: "کھانا ختم کرنے کی دعا", arabic: "الْحَمْدُ للهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَجَعَلْنَا مِنَ الْمُسْلِمِينَ", translation: "تمام تعریفیں اللہ کے لیے ہیں جس نے ہمیں کھلایا پلایا اور ہمیں مسلمان بنایا", category: "🍽️ کھانے پینے کی دعائیں"},
@@ -416,104 +210,57 @@
             {id: 20, title: "روزہ افطار کرنے کی دعا", arabic: "اللَّهُمَّ إِنِّي لَكَ صُمْتُ وَبِكَ آمَنْتُ وَعَلَيْكَ تَوَكَّلْتُ وَعَلَى رِزْقِكَ أَفْطَرْتُ", translation: "اے اللہ! میں نے تیرے لیے روزہ رکھا، تیرے پر ایمان لایا، تجھ پر بھروسہ کیا اور تیرے رزق سے افطار کیا", category: "🌟 دیگر اہم دعائیں"}
         ];
 
-        // DOM elements
-        const duasContainer = document.getElementById('duas-container');
-        const searchInput = document.getElementById('search');
-        const filterButtons = document.querySelectorAll('.filter-btn');
-        const updateNotification = document.getElementById('update-notification');
-        const installButton = document.getElementById('install-button');
-        const refreshButton = document.getElementById('refresh-button');
-
-        // Initialize the app
-        function initApp() {
-            renderDuas();
-            setupEventListeners();
-            checkForUpdates();
-        }
-
-        // Render duas
         function renderDuas(filter = 'all', searchTerm = '') {
             duasContainer.innerHTML = '';
-            
-            // Group duas by category
             const categories = {};
             duas.forEach(dua => {
-                if (!categories[dua.category]) {
-                    categories[dua.category] = [];
-                }
+                if (!categories[dua.category]) categories[dua.category] = [];
                 categories[dua.category].push(dua);
             });
 
-            // Render each category
             for (const [category, categoryDuas] of Object.entries(categories)) {
                 const categoryDiv = document.createElement('div');
                 categoryDiv.className = 'category';
-                
                 const categoryTitle = document.createElement('div');
                 categoryTitle.className = 'category-title';
                 categoryTitle.textContent = category;
                 categoryDiv.appendChild(categoryTitle);
 
-                // Render duas in this category
                 categoryDuas.forEach(dua => {
                     const memorized = localStorage.getItem(`dua-${dua.id}-memorized`) === 'true';
                     const favorite = localStorage.getItem(`dua-${dua.id}-favorite`) === 'true';
-                    
-                    // Apply filters
-                    if (filter === 'all' || 
-                        (filter === 'memorized' && memorized) || 
-                        (filter === 'favorite' && favorite)) {
-                        
-                        // Apply search
-                        const matchesSearch = searchTerm === '' || 
-                            dua.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            dua.arabic.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                            dua.translation.toLowerCase().includes(searchTerm.toLowerCase());
-                        
+
+                    if (filter === 'all' || (filter === 'memorized' && memorized) || (filter === 'favorite' && favorite)) {
+                        const matchesSearch = searchTerm === '' || dua.title.includes(searchTerm) || dua.arabic.includes(searchTerm) || dua.translation.includes(searchTerm);
                         if (matchesSearch) {
                             const duaCard = document.createElement('div');
                             duaCard.className = 'dua-card';
                             duaCard.dataset.id = dua.id;
-                            duaCard.dataset.memorized = memorized;
-                            duaCard.dataset.favorite = favorite;
-                            
                             duaCard.innerHTML = `
                                 <div class="dua-title">${dua.title}</div>
                                 <div class="dua-content">${dua.arabic}</div>
                                 <div class="dua-translation">${dua.translation}</div>
                                 <div class="dua-actions">
-                                    <button class="btn btn-memorized ${memorized ? 'active' : ''}" 
-                                            data-id="${dua.id}" data-action="memorized">
+                                    <button class="btn btn-memorized ${memorized ? 'active' : ''}" data-id="${dua.id}" data-action="memorized">
                                         ${memorized ? '✓ یاد ہوگئی' : 'یاد کرنا ہے'}
                                     </button>
-                                    <button class="btn btn-favorite ${favorite ? 'active' : ''}" 
-                                            data-id="${dua.id}" data-action="favorite">
+                                    <button class="btn btn-favorite ${favorite ? 'active' : ''}" data-id="${dua.id}" data-action="favorite">
                                         ${favorite ? '★ پسندیدہ' : 'پسندیدہ بنائیں'}
                                     </button>
-                                </div>
-                            `;
-                            
+                                </div>`;
                             categoryDiv.appendChild(duaCard);
                         }
                     }
                 });
-
-                // Only add category if it has visible duas
-                if (categoryDiv.children.length > 1) {
-                    duasContainer.appendChild(categoryDiv);
-                }
+                if (categoryDiv.children.length > 1) duasContainer.appendChild(categoryDiv);
             }
         }
 
-        // Set up event listeners
         function setupEventListeners() {
-            // Search functionality
-            searchInput.addEventListener('input', (e) => {
+            searchInput.addEventListener('input', e => {
                 const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
                 renderDuas(activeFilter, e.target.value);
             });
-
-            // Filter buttons
             filterButtons.forEach(button => {
                 button.addEventListener('click', () => {
                     filterButtons.forEach(btn => btn.classList.remove('active'));
@@ -521,65 +268,64 @@
                     renderDuas(button.dataset.filter, searchInput.value);
                 });
             });
-
-            // Memorized and Favorite buttons
-            duasContainer.addEventListener('click', (e) => {
-                if (e.target.classList.contains('btn-memorized') || e.target.classList.contains('btn-favorite')) {
-                    const id = e.target.dataset.id;
-                    const action = e.target.dataset.action;
+            duasContainer.addEventListener('click', e => {
+                const button = e.target.closest('button');
+                if (button && (button.classList.contains('btn-memorized') || button.classList.contains('btn-favorite'))) {
+                    const id = button.dataset.id;
+                    const action = button.dataset.action;
+                    const key = `dua-${id}-${action}`;
+                    const isActive = localStorage.getItem(key) === 'true';
+                    localStorage.setItem(key, !isActive);
                     
                     if (action === 'memorized') {
-                        const isMemorized = localStorage.getItem(`dua-${id}-memorized`) === 'true';
-                        localStorage.setItem(`dua-${id}-memorized`, !isMemorized);
-                        e.target.textContent = !isMemorized ? '✓ یاد ہوگئی' : 'یاد کرنا ہے';
-                        e.target.classList.toggle('active');
-                    } else if (action === 'favorite') {
-                        const isFavorite = localStorage.getItem(`dua-${id}-favorite`) === 'true';
-                        localStorage.setItem(`dua-${id}-favorite`, !isFavorite);
-                        e.target.textContent = !isFavorite ? '★ پسندیدہ' : 'پسندیدہ بنائیں';
-                        e.target.classList.toggle('active');
+                        button.textContent = !isActive ? '✓ یاد ہوگئی' : 'یاد کرنا ہے';
+                    } else {
+                        button.textContent = !isActive ? '★ پسندیدہ' : 'پسندیدہ بنائیں';
+                    }
+                    button.classList.toggle('active');
+
+                    // اگر فلٹر فعال ہو تو دوبارہ رینڈر کریں
+                    const activeFilter = document.querySelector('.filter-btn.active').dataset.filter;
+                    if (activeFilter !== 'all') {
+                        renderDuas(activeFilter, searchInput.value);
                     }
                 }
             });
-
-            // Refresh button for updates
-            refreshButton.addEventListener('click', () => {
-                window.location.reload();
-            });
         }
-
-        // Check for updates
-        function checkForUpdates() {
-            // In a real PWA, this would be handled by the service worker
-            // This is just a placeholder for demonstration
-            setTimeout(() => {
-                updateNotification.style.display = 'block';
-            }, 5000);
-        }
-
-        // PWA installation
+        
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             installButton.style.display = 'block';
-        });
-
-        installButton.addEventListener('click', () => {
-            if (deferredPrompt) {
+            installButton.addEventListener('click', () => {
+                installButton.style.display = 'none';
                 deferredPrompt.prompt();
                 deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('User accepted install prompt');
-                    }
                     deferredPrompt = null;
-                    installButton.style.display = 'none';
                 });
-            }
+            });
         });
 
-        // Initialize the app
-        initApp();
+        document.addEventListener('DOMContentLoaded', () => {
+            renderDuas();
+            setupEventListeners();
+        });
+    </script>
+    
+    <!-- === سروس ورکر کو رجسٹر کرنے کا اسکرپٹ === -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(registration => {
+                        console.log('Service Worker registered successfully:', registration);
+                    })
+                    .catch(err => {
+                        console.error('Service Worker registration failed:', err);
+                    });
+            });
+        }
     </script>
 </body>
 </html>
