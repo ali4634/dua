@@ -1,27 +1,26 @@
-// سروس ورکر کا ورژن بدل دیں تاکہ براؤزر کو پتہ چلے کہ نیا ورژن آیا ہے
-const CACHE_NAME = 'dua-app-cache-v8-smart'; 
-// اپنی ریپازٹری کا نام یہاں لکھیں (یہ بہت اہم ہے)
+// یہ ہمارا آخری اور بہترین ورژن ہے
+const CACHE_NAME = 'dua-app-cache-v11-navigation-fix'; 
 const REPO_PREFIX = '/dua/';
+const APP_SHELL_URL = REPO_PREFIX + 'index.html';
 
+// وہ تمام فائلیں جنہیں کیشے کرنا ہے
 const urlsToCache = [
-  REPO_PREFIX,
-  REPO_PREFIX + 'index.html',
+  APP_SHELL_URL,
   REPO_PREFIX + 'manifest.json',
   REPO_PREFIX + 'icon-192.png',
   REPO_PREFIX + 'icon-512.png'
 ];
 
-// 1. انسٹال: نیا سروس ورکر انسٹال کریں اور فوراً کنٹرول سنبھالیں
+// 1. انسٹال: نیا سروس ورکر انسٹال کریں
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Opened cache and caching assets');
+        console.log('Caching app shell');
         return cache.addAll(urlsToCache);
       })
   );
-  // یہ لائن پرانے سروس ورکر کو ہٹا کر نئے کو فوراً ایکٹیویٹ کر دے گی
-  self.skipWaiting(); 
+  self.skipWaiting();
 });
 
 // 2. ایکٹیویٹ: پرانے کیشے کو صاف کریں
@@ -30,41 +29,36 @@ self.addEventListener('activate', event => {
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          // اگر کیشے کا نام موجودہ نام سے مختلف ہے تو اسے ڈیلیٹ کر دیں
           if (cacheName !== CACHE_NAME) {
-            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     })
   );
-  // تمام کھلے ہوئے ٹیبز کا کنٹرول سنبھالیں
   return self.clients.claim();
 });
 
-// 3. فیچ: "Stale-While-Revalidate" حکمت عملی
+// 3. فیچ: سب سے اہم اور نیا حصہ
 self.addEventListener('fetch', event => {
-  // صرف GET درخواستوں کا جواب دیں
-  if (event.request.method !== 'GET') return;
+  // اگر یہ ایک صفحے کی درخواست (navigation request) ہے
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      // کیشے میں سے index.html کو تلاش کریں
+      caches.match(APP_SHELL_URL)
+        .then(response => {
+          // اگر وہ مل جائے تو اسے واپس کریں، ورنہ نیٹ ورک سے لانے کی کوشش کریں
+          return response || fetch(APP_SHELL_URL);
+        })
+    );
+    return; // یہاں رک جائیں
+  }
 
+  // دیگر تمام درخواستوں (تصاویر، manifest) کے لیے، کیشے کو پہلے دیکھیں
   event.respondWith(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.match(event.request).then(cachedResponse => {
-        
-        // نیٹ ورک سے تازہ ترین ورژن حاصل کرنے کا وعدہ
-        const fetchPromise = fetch(event.request).then(networkResponse => {
-          // اگر درخواست کامیاب ہو تو کیشے کو نئے جواب سے اپ ڈیٹ کریں
-          if (networkResponse && networkResponse.status === 200) {
-            cache.put(event.request, networkResponse.clone());
-          }
-          return networkResponse;
-        });
-
-        // اگر کیشے میں جواب موجود ہے تو فوراً وہ واپس کریں، اور پس منظر میں نیا ورژن لانے دیں
-        // ورنہ نیٹ ورک کے جواب کا انتظار کریں
-        return cachedResponse || fetchPromise;
-      });
-    })
+    caches.match(event.request)
+      .then(response => {
+        return response || fetch(event.request);
+      })
   );
 });
