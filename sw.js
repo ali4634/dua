@@ -1,26 +1,30 @@
-const CACHE_NAME = 'dua-app-cache-v2'; // کیشے کا ورژن بدل دیں تاکہ نیا سروس ورکر انسٹال ہو
+// سروس ورکر کا ورژن بدل دیں تاکہ یہ دوبارہ انسٹال ہو
+const CACHE_NAME = 'dua-app-cache-v5-final';
+// اپنی ریپازٹری کا نام یہاں لکھیں
+const REPO_PREFIX = '/dua/';
+
+// وہ تمام فائلیں جنہیں کیشے کرنا ہے، مکمل راستے کے ساتھ
 const urlsToCache = [
-  '.',
-  'index.html',
-  'manifest.json',
-  'icon-192.png',
-  'icon-512.png'
-  // اگر آپ کی CSS یا JS فائلیں الگ ہیں تو انہیں بھی یہاں شامل کریں
+  REPO_PREFIX, // ریپازٹری کی جڑ (root)
+  REPO_PREFIX + 'index.html', // index.html فائل
+  REPO_PREFIX + 'manifest.json',
+  REPO_PREFIX + 'icon-192.png',
+  REPO_PREFIX + 'icon-512.png'
 ];
 
-// 1. انسٹال: نیا سروس ورکر انسٹال کریں اور اثاثے کیشے کریں
+// سروس ورکر انسٹال کریں
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Opened cache and caching assets');
+        console.log('Opened cache and caching all assets with full paths');
         return cache.addAll(urlsToCache);
       })
   );
-  self.skipWaiting(); // فوراً نئے سروس ورکر کو ایکٹیویٹ کرو
+  self.skipWaiting();
 });
 
-// 2. ایکٹیویٹ: پرانے کیشے کو صاف کریں
+// پرانے کیشے کو صاف کریں
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
@@ -34,34 +38,20 @@ self.addEventListener('activate', event => {
       );
     })
   );
-  return self.clients.claim(); // تمام کھلے کلائنٹس کا کنٹرول سنبھالو
+  return self.clients.claim();
 });
 
-// 3. فیچ: Stale-While-Revalidate حکمت عملی استعمال کریں
+// ہر درخواست کا جواب دیں
 self.addEventListener('fetch', event => {
-  // صرف GET درخواستوں کا جواب دیں
-  if (event.request.method !== 'GET') {
-    return;
-  }
-
   event.respondWith(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.match(event.request).then(response => {
-        // کیشے سے جواب دیں اور پس منظر میں نیٹ ورک سے اپ ڈیٹ کریں
-        const fetchPromise = fetch(event.request).then(networkResponse => {
-          // اگر درخواست کامیاب ہو تو کیشے کو اپ ڈیٹ کریں
-          if (networkResponse && networkResponse.status === 200) {
-            cache.put(event.request, networkResponse.clone());
-          }
-          return networkResponse;
-        }).catch(err => {
-            // نیٹ ورک فیل ہونے پر خاموش رہیں، کیونکہ کیشے سے پہلے ہی جواب جا چکا ہے
-            console.warn('Fetch failed; user is likely offline.', err);
-        });
-
-        // کیشے سے جواب فوراً واپس کریں اگر موجود ہے، ورنہ نیٹ ورک کے جواب کا انتظار کریں
-        return response || fetchPromise;
-      });
-    })
+    caches.match(event.request)
+      .then(response => {
+        // اگر کیشے میں جواب موجود ہے تو وہ واپس کریں
+        if (response) {
+          return response;
+        }
+        // ورنہ نیٹ ورک سے درخواست کریں
+        return fetch(event.request);
+      })
   );
 });
