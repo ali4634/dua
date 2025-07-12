@@ -4,114 +4,81 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#3498db"/>
-    <meta name="description" content="روزمرہ کی دعائیں سیکھیں، یاد کریں اور تلاش کریں۔">
     <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon-192.png">
     <title>روزمرہ دعائیں ایپ</title>
     <style>
-        /* آپ کا سارا CSS کوڈ یہاں ہے */
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px; color: #333; }
-        .container { max-width: 800px; margin: 0 auto; background-color: white; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); padding: 20px; }
-        h1 { font-family: 'Noto Nastaliq Urdu', 'Jameel Noori Nastaleeq', 'Pak Nastaleeq', serif; color: #2c3e50; text-align: center; margin-bottom: 30px; border-bottom: 2px solid #3498db; padding-bottom: 10px; }
-        .dua-content { font-family: 'Noto Naskh Arabic', 'Amiri', 'Scheherazade New', serif; font-size: 24px; line-height: 1.8; text-align: center; color: #1a5276; }
-        .dua-card { background-color: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 15px; margin-bottom: 15px; }
-        .category { margin-bottom: 30px; }
-        .category-title { background-color: #3498db; color: white; padding: 10px 15px; border-radius: 5px; font-size: 20px; margin-bottom: 15px; }
-        .dua-title { font-weight: bold; color: #2c3e50; margin-bottom: 10px; font-size: 18px; }
-        .dua-translation { font-size: 16px; color: #7f8c8d; margin-top: 10px; border-top: 1px dashed #ddd; padding-top: 10px; }
-        .dua-actions { display: flex; justify-content: space-between; margin-top: 15px; }
-        .btn { padding: 8px 15px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .btn-memorized { background-color: #2ecc71; color: white; }
-        .btn-memorized.active { background-color: #27ae60; }
-        .btn-favorite { background-color: #f39c12; color: white; }
-        .btn-favorite.active { background-color: #d35400; }
-        .search-container { margin-bottom: 20px; }
-        #search { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 16px; box-sizing: border-box; }
-        .filter-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
-        .filter-btn { flex: 1; padding: 10px; background-color: #ecf0f1; border: 1px solid #bdc3c7; border-radius: 5px; cursor: pointer; font-weight: bold; }
-        .filter-btn.active { background-color: #3498db; color: white; border-color: #3498db; }
-        #install-button { display: none; position: fixed; bottom: 20px; left: 20px; background: #3498db; color: white; padding: 12px 18px; border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 8px rgba(0,0,0,0.2); font-size: 16px; z-index: 1000; }
-        #debug-info { display: none; /* مسئلہ حل ہونے کے بعد اسے none کر دیں */ position: fixed; top: 0; left: 0; right: 0; background-color: #ffc107; color: black; padding: 10px; font-size: 14px; z-index: 9999; border-bottom: 2px solid #e0a800; }
+        body { font-family: sans-serif; background-color: #f5f5f5; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background-color: white; padding: 20px; }
+        .dua-item { padding: 10px; border: 2px solid #2ecc71; margin-bottom: 10px; border-radius: 5px; }
+        #debug-info { position: fixed; top: 0; left: 0; right: 0; background-color: #ffc107; padding: 10px; z-index: 9999; }
     </style>
 </head>
 <body>
     <div id="debug-info">اسٹیٹس: ایپ شروع ہو رہی ہے...</div>
     <div class="container">
-        <h1>📿 روزمرہ دعائیں ایپ</h1>
-        <div class="search-container"><input type="text" id="search" placeholder="دعا تلاش کریں..."></div>
-        <div class="filter-buttons">
-            <button class="filter-btn active" data-filter="all">تمام دعائیں</button>
-            <button class="filter-btn" data-filter="memorized">یاد شدہ</button>
-            <button class="filter-btn" data-filter="favorite">پسندیدہ</button>
+        <h1>📿 دعاؤں کی سادہ فہرست (ٹیسٹ)</h1>
+        <div id="duas-container">
+            <p>اگر آپ کو یہ نظر آ رہا ہے اور دعائیں نہیں، تو renderDuas نہیں چلا۔</p>
         </div>
-        <div id="duas-container"></div>
     </div>
-    <button id="install-button">ایپ انسٹال کریں</button>
 
     <script>
-        // === پہلا اسکرپٹ بلاک ===
         const debugInfo = document.getElementById('debug-info');
         function logToScreen(message) {
-            console.log(message);
-            if(debugInfo) {
-                debugInfo.innerHTML += `<br>${message}`;
-            }
+            if(debugInfo) debugInfo.innerHTML += `<br>${message}`;
         }
 
         try {
-            logToScreen("اسکرپٹ چلنا شروع ہوا۔");
-            const duasContainer = document.getElementById('duas-container');
-            const searchInput = document.getElementById('search');
-            const filterButtons = document.querySelectorAll('.filter-btn');
-            const installButton = document.getElementById('install-button');
-            logToScreen("تمام HTML عناصر مل گئے۔");
+            logToScreen("اسکرپٹ شروع ہوا۔");
 
+            const duasContainer = document.getElementById('duas-container');
+            if (!duasContainer) {
+                logToScreen("!!! خرابی: duas-container نہیں ملا!");
+            } else {
+                logToScreen("duas-container مل گیا۔");
+            }
+            
             const duas = [
-                {id: 1, title: "کھانا شروع کرنے کی دعا", arabic: "بِسْمِ اللهِ وَعَلَى بَرَكَةِ اللهِ", translation: "اللہ کے نام سے اور اللہ کی برکت کے ساتھ", category: "🍽️ کھانے پینے کی دعائیں"}, {id: 2, title: "کھانا ختم کرنے کی دعا", arabic: "الْحَمْدُ للهِ الَّذِي أَطْعَمَنَا وَسَقَانَا وَجَعَلْنَا مِنَ الْمُسْلِمِينَ", translation: "تمام تعریفیں اللہ کے لیے ہیں جس نے ہمیں کھلایا پلایا اور ہمیں مسلمان بنایا", category: "🍽️ کھانے پینے کی دعائیں"}, {id: 3, title: "سونے کی دعا", arabic: "اللَّهُمَّ بِاسْمِكَ أَمُوتُ وَأَحْيَا", translation: "اے اللہ! تیرے نام کے ساتھ میں مرتا ہوں اور جیتا ہوں", category: "🛌 سونے جاگنے کی دعائیں"}, {id: 4, title: "جاگنے کی دعا", arabic: "الْحَمْدُ للهِ الَّذِي أَحْيَانَا بَعْدَ مَا أَمَاتَنَا وَإِلَيْهِ النُّشُورُ", translation: "تمام تعریفیں اللہ کے لیے ہیں جس نے ہمیں موت کے بعد زندہ کیا اور اسی کی طرف اٹھنا ہے", category: "🛌 سونے جاگنے کی دعائیں"}, {id: 5, title: "بیت الخلاء جانے کی دعا", arabic: "اللهُمَّ إِنِّي أَعُوذُ بِكَ مِنَ الْخُبُثِ وَالْخَبَائِثِ", translation: "اے اللہ! میں تیری پناہ چاہتا ہوں تمام برے مردوں اور عورتوں (شیاطین) سے", category: "🌟 دیگر اہم دعائیں"}, {id: 6, title: "بیت الخلاء سے نکلنے کی دعا", arabic: "الْحَمْدُ للهِ الَّذِي أَذْهَبَ عَنِّي الْأَذَى وَعَافَانِي", translation: "تمام تعریفیں اللہ کے لیے ہیں جس نے مجھ سے تکلیف دور کی اور مجھے عافیت بخشی", category: "🌟 دیگر اہم دعائیں"}, {id: 7, title: "گھر میں داخل ہونے کی دعا", arabic: "اللهمَّ إِنِّي أَسْأَلُكَ خَيْرَ الْمَوْلِجِ وَخَيْرَ الْمَخْرَجِ", translation: "اے اللہ! میں تیرے سے بہترین داخلے اور بہترین نکلنے کا سوال کرتا ہوں", category: "🏠 گھر اور مسجد کی دعائیں"}, {id: 8, title: "گھر سے نکلنے کی دعا", arabic: "بِسْمِ اللهِ تَوَكَّلْتُ عَلَى اللهِ وَلَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللَّهِ", translation: "اللہ کے نام سے، میں نے اللہ پر بھروسہ کیا، اور نہ کوئی طاقت نہ کوئی قوت مگر اللہ کی مدد سے", category: "🏠 گھر اور مسجد کی دعائیں"}, {id: 9, title: "مسجد میں داخل ہونے کی دعا", arabic: "اللَّهُمَّ افْتَحْ لِي أَبْوَابَ رَحْمَتِكَ", translation: "اے اللہ! میرے لیے اپنی رحمت کے دروازے کھول دے", category: "🏠 گھر اور مسجد کی دعائیں"}, {id: 10, title: "مسجد سے نکلنے کی دعا", arabic: "اللَّهُمَّ إِنِّي أَسْأَلُكَ مِنْ فَضْلِكَ وَرَحْمَتِكَ", translation: "اے اللہ! میں تیرے فضل اور تیری رحمت کا سوال کرتا ہوں", category: "🏠 گھر اور مسجد کی دعائیں"}, {id: 11, title: "سواری پر بیٹھنے کی دعا", arabic: "سُبْحَانَ الَّذِي سَخَّرَ لَنَا هَذَا وَمَا كُنَّا لَهُ مُقْرِنِينَ وَإِنَّا إِلَى رَبِّنَا لَمُنقَلِبُونَ", translation: "پاک ہے وہ ذات جس نے ہمارے لیے اسے مسخر کیا، ورنہ ہم اس پر قابو نہ پا سکتے، اور ہمیں اپنے رب ہی کی طرف لوٹ کر جانا ہے", category: "🌟 دیگر اہم دعائیں"}, {id: 12, title: "سواری سے اترنے کی دعا", arabic: "رَبِّ انْزِلْنِي مُنْزَلًا مُبَارَكًا وَأَنْتَ خَيْرُ الْمُنْزِلِينَ", translation: "اے میرے رب! مجھے برکت والی جگہ اتار، اور تو سب سے بہتر اتارنے والا ہے", category: "🌟 دیگر اہم دعائیں"}, {id: 13, title: "مصیبت کے وقت کی دعا", arabic: "إِنَّا للهِ وَإِنَّا إِلَيْهِ رَاجِعُونَ", translation: "بے شک ہم اللہ کے لیے ہیں اور ہمیں اسی کی طرف لوٹ کر جانا ہے", category: "🌟 دیگر اہم دعائیں"}, {id: 14, title: "لباس پہننے کی دعا", arabic: "الْحَمْدُ للهِ الَّذِي كَسَانِي مَا أَوَارِي بِهِ عَوْرَتِي وَأَتَجَمَّلُ بِهِ فِي حَيَاتِي", translation: "تمام تعریفیں اللہ کے لیے ہیں جس نے مجھے ایسا لباس پہنایا جس سے میں اپنی شرمگاہوں کو چھپاتا ہوں اور اپنی زندگی میں اس سے زینت اختیار کرتا ہوں", category: "🌟 دیگر اہم دعائیں"}, {id: 15, title: "مریض کی عیادت کی دعا", arabic: "لَا بَأْسَ طَهُورٌ إِنْ شَاءَ اللهِ", translation: "کوئی بیماری نہیں، یہ پاکی ہے ان شاء اللہ", category: "🌟 دیگر اہم دعائیں"}, {id: 16, title: "دودھ پینے کی دعا", arabic: "اللَّهُمَّ بَارِكْ لَنَا فِيهِ وَزِدْنَا مِنْهُ", translation: "اے اللہ! ہمارے لیے اس میں برکت دے اور ہمیں اور زیادہ عطا فرما", category: "🍽️ کھانے پینے کی دعائیں"}, {id: 17, title: "چاند دیکھنے کی دعا", arabic: "اللَّهُمَّ أَهِلَّهُ عَلَيْنَا بِالْأَمْنِ وَالْإِيمَانِ وَالسَّلَامَةِ وَالْإِسْلَامِ رَبِّي وَرَبُّكَ اللَّهُ", translation: "اے اللہ! اس چاند کو ہم پر امن، ایمان، سلامتی اور اسلام کے ساتھ طلوع فرما، میرا اور تیرا رب اللہ ہے", category: "🌟 دیگر اہم دعائیں"}, {id: 18, title: "آئینہ دیکھنے کی دعا", arabic: "اللَّهُمَّ حَسَّنْتَ خَلْقِي فَحَسِّنْ خُلُقِي", translation: "اے اللہ! جیسے تو نے میرے خلق (صورت) کو خوبصورت بنایا ہے، میرے اخلاق کو بھی خوبصورت بنا دے", category: "🌟 دیگر اہم دعائیں"}, {id: 19, title: "روزہ رکھنے کی دعا", arabic: "وَبِصَوْمِ غَدٍ نَوَيْتُ مِنْ شَهْرِ رَمَضَانَ", translation: "میں نے کل کے روزے کی نیت کی رمضان کے مہینے میں", category: "🌟 دیگر اہم دعائیں"}, {id: 20, title: "روزہ افطار کرنے کی دعا", arabic: "اللَّهُمَّ إِنِّي لَكَ صُمْتُ وَبِكَ آمَنْتُ وَعَلَيْكَ تَوَكَّلْتُ وَعَلَى رِزْقِكَ أَفْطَرْتُ", translation: "اے اللہ! میں نے تیرے لیے روزہ رکھا، تیرے پر ایمان لایا، تجھ پر بھروسہ کیا اور تیرے رزق سے افطار کیا", category: "🌟 دیگر اہم دعائیں"}
+                {id: 1, title: "کھانا شروع کرنے کی دعا"}, {id: 2, title: "کھانا ختم کرنے کی دعا"}, {id: 3, title: "سونے کی دعا"}, {id: 4, title: "جاگنے کی دعا"}, {id: 5, title: "بیت الخلاء جانے کی دعا"}, {id: 6, title: "بیت الخلاء سے نکلنے کی دعا"}, {id: 7, title: "گھر میں داخل ہونے کی دعا"}, {id: 8, title: "گھر سے نکلنے کی دعا"}, {id: 9, title: "مسجد میں داخل ہونے کی دعا"}, {id: 10, title: "مسجد سے نکلنے کی دعا"}, {id: 11, title: "سواری پر بیٹھنے کی دعا"}, {id: 12, title: "سواری سے اترنے کی دعا"}, {id: 13, title: "مصیبت کے وقت کی دعا"}, {id: 14, title: "لباس پہننے کی دعا"}, {id: 15, title: "مریض کی عیادت کی دعا"}, {id: 16, title: "دودھ پینے کی دعا"}, {id: 17, title: "چاند دیکھنے کی دعا"}, {id: 18, title: "آئینہ دیکھنے کی دعا"}, {id: 19, title: "روزہ رکھنے کی دعا"}, {id: 20, title: "روزہ افطار کرنے کی دعا"}
             ];
-            logToScreen(`دعاؤں کا ڈیٹا موجود ہے: ${duas.length} دعائیں ملیں۔`);
-            
-            function renderDuas(filter = 'all', searchTerm = '') {
-                logToScreen("renderDuas فنکشن چل رہا ہے۔ فلٹر: " + filter);
-                duasContainer.innerHTML = ''; const categories = {}; duas.forEach(dua => { if (!categories[dua.category]) categories[dua.category] = []; categories[dua.category].push(dua); }); for (const [category, categoryDuas] of Object.entries(categories)) { const categoryDiv = document.createElement('div'); categoryDiv.className = 'category'; const categoryTitle = document.createElement('div'); categoryTitle.className = 'category-title'; categoryTitle.textContent = category; categoryDiv.appendChild(categoryTitle); categoryDuas.forEach(dua => { const memorized = localStorage.getItem(`dua-${dua.id}-memorized`) === 'true'; const favorite = localStorage.getItem(`dua-${dua.id}-favorite`) === 'true'; if (filter === 'all' || (filter === 'memorized' && memorized) || (filter === 'favorite' && favorite)) { const matchesSearch = searchTerm === '' || dua.title.includes(searchTerm) || dua.arabic.includes(searchTerm) || dua.translation.includes(searchTerm); if (matchesSearch) { const duaCard = document.createElement('div'); duaCard.className = 'dua-card'; duaCard.dataset.id = dua.id; duaCard.innerHTML = ` <div class="dua-title">${dua.title}</div> <div class="dua-content">${dua.arabic}</div> <div class="dua-translation">${dua.translation}</div> <div class="dua-actions"> <button class="btn btn-memorized ${memorized ? 'active' : ''}" data-id="${dua.id}" data-action="memorized"> ${memorized ? '✓ یاد ہوگئی' : 'یاد کرنا ہے'} </button> <button class="btn btn-favorite ${favorite ? 'active' : ''}" data-id="${dua.id}" data-action="favorite"> ${favorite ? '★ پسندیدہ' : 'پسندیدہ بنائیں'} </button> </div>`; categoryDiv.appendChild(duaCard); } } }); if (categoryDiv.children.length > 1) duasContainer.appendChild(categoryDiv); }
-                logToScreen("renderDuas فنکشن مکمل ہوا۔");
+            logToScreen(`دعاؤں کا ڈیٹا ملا: ${duas.length} دعائیں۔`);
+
+            // === بالکل سادہ renderDuas فنکشن ===
+            function renderDuas() {
+                logToScreen("سادہ renderDuas چل رہا ہے۔");
+                if (!duasContainer) return; // اگر کنٹینر نہ ہو تو رُک جاؤ
+                
+                duasContainer.innerHTML = ''; // کنٹینر کو خالی کرو
+
+                if (!duas || duas.length === 0) {
+                    logToScreen("کوئی دعا نہیں ملی۔");
+                    duasContainer.innerHTML = '<p>دعاؤں کا ڈیٹا خالی ہے۔</p>';
+                    return;
+                }
+
+                duas.forEach(dua => {
+                    const duaElement = document.createElement('div');
+                    duaElement.className = 'dua-item';
+                    duaElement.textContent = dua.title;
+                    duasContainer.appendChild(duaElement);
+                });
+                logToScreen("سادہ renderDuas مکمل ہوا۔ اب دعائیں نظر آنی چاہئیں۔");
             }
-            
-            function setupEventListeners() {
-                logToScreen("setupEventListeners فنکشن چل رہا ہے۔");
-                searchInput.addEventListener('input', e => { const activeFilter = document.querySelector('.filter-btn.active').dataset.filter; renderDuas(activeFilter, e.target.value); }); filterButtons.forEach(button => { button.addEventListener('click', () => { filterButtons.forEach(btn => btn.classList.remove('active')); button.classList.add('active'); renderDuas(button.dataset.filter, searchInput.value); }); }); duasContainer.addEventListener('click', e => { const button = e.target.closest('button'); if (button && (button.classList.contains('btn-memorized') || button.classList.contains('btn-favorite'))) { const id = button.dataset.id; const action = button.dataset.action; const key = `dua-${id}-${action}`; const isActive = localStorage.getItem(key) === 'true'; localStorage.setItem(key, !isActive); if (action === 'memorized') { button.textContent = !isActive ? '✓ یاد ہوگئی' : 'یاد کرنا ہے'; } else { button.textContent = !isActive ? '★ پسندیدہ' : 'پسندیدہ بنائیں'; } button.classList.toggle('active'); const activeFilter = document.querySelector('.filter-btn.active').dataset.filter; if (activeFilter !== 'all') { renderDuas(activeFilter, searchInput.value); } } });
-                logToScreen("setupEventListeners فنکشن مکمل ہوا۔");
-            }
-            
-            let deferredPrompt; 
-            window.addEventListener('beforeinstallprompt', (e) => {
-                logToScreen("beforeinstallprompt ایونٹ فائر ہوا۔ انسٹال بٹن دکھایا جا رہا ہے۔");
-                e.preventDefault(); 
-                deferredPrompt = e; 
-                installButton.style.display = 'block'; 
-                installButton.addEventListener('click', () => { installButton.style.display = 'none'; deferredPrompt.prompt(); deferredPrompt.userChoice.then((choiceResult) => { deferredPrompt = null; }); }); 
-            });
 
             logToScreen("ایپ کو شروع کیا جا رہا ہے...");
             renderDuas();
-            setupEventListeners();
-            logToScreen("ایپ کامیابی سے شروع ہو گئی۔ اب دعائیں نظر آنی چاہئیں۔");
+            logToScreen("ایپ کامیابی سے شروع ہو گئی۔");
+
         } catch (error) {
-            logToScreen(`!!! ایک خرابی واقع ہوئی: ${error.message}`);
+            logToScreen(`!!! ایک بہت بڑی خرابی واقع ہوئی: ${error.message}`);
         }
     </script>
     
     <script>
-        // === دوسرا اسکرپٹ بلاک (اسے نہ چھیڑیں) ===
+        // سروس ورکر کا کوڈ ویسے ہی رہے گا
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('sw.js')
-                    .then(registration => {
-                        console.log('Service Worker registered successfully:', registration);
-                    })
-                    .catch(err => {
-                        console.error('Service Worker registration failed:', err);
-                    });
+                navigator.serviceWorker.register('sw.js').catch(err => console.error(err));
             });
         }
     </script>
