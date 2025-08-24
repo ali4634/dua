@@ -1,35 +1,42 @@
-// یہ ہمارا آخری اور بہترین ورژن ہے
-const CACHE_NAME = 'dua-app-cache-v11-navigation-fix'; 
-const REPO_PREFIX = '/dua/';
-const APP_SHELL_URL = REPO_PREFIX + 'index.html';
+// Service Worker ka naya, saaf suthra aur universal version
+const CACHE_NAME = 'hifaz-tracker-cache-v1'; // Aap apni app ka naam de sakte hain
 
-// وہ تمام فائلیں جنہیں کیشے کرنا ہے
+// Woh tamam files jinhein cache karna hai (bina kisi prefix ke)
+// Yeh zaroori hai ke in files ke naam bilkul wese hi hon jaise aapke folder mein hain
 const urlsToCache = [
-  APP_SHELL_URL,
-  REPO_PREFIX + 'manifest.json',
-  REPO_PREFIX + 'icon-192.png',
-  REPO_PREFIX + 'icon-512.png'
+  './',             // Yeh root ko represent karta hai, aam tor par index.html
+  './index.html',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png',
+  // Agar aapne libraries download karke libs folder mein rakhi hain, to unhein bhi shamil karein
+  // './libs/jspdf.umd.min.js',
+  // './libs/html2canvas.min.js',
+  // Agar aap online libraries istemal kar rahe hain, to unke poore URL shamil karein
+  'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css'
 ];
 
-// 1. انسٹال: نیا سروس ورکر انسٹال کریں
+// 1. Install: App shell ko cache karein
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Caching app shell');
+        console.log('Opened cache. Caching app shell files.');
         return cache.addAll(urlsToCache);
       })
   );
   self.skipWaiting();
 });
 
-// 2. ایکٹیویٹ: پرانے کیشے کو صاف کریں
+// 2. Activate: Purane cache ko saaf karein
 self.addEventListener('activate', event => {
+  const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME) {
+          if (cacheWhitelist.indexOf(cacheName) === -1) {
+            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -39,26 +46,17 @@ self.addEventListener('activate', event => {
   return self.clients.claim();
 });
 
-// 3. فیچ: سب سے اہم اور نیا حصہ
+// 3. Fetch: Cache se jawab dein, agar na mile to network par jayein
 self.addEventListener('fetch', event => {
-  // اگر یہ ایک صفحے کی درخواست (navigation request) ہے
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      // کیشے میں سے index.html کو تلاش کریں
-      caches.match(APP_SHELL_URL)
-        .then(response => {
-          // اگر وہ مل جائے تو اسے واپس کریں، ورنہ نیٹ ورک سے لانے کی کوشش کریں
-          return response || fetch(APP_SHELL_URL);
-        })
-    );
-    return; // یہاں رک جائیں
-  }
-
-  // دیگر تمام درخواستوں (تصاویر، manifest) کے لیے، کیشے کو پہلے دیکھیں
   event.respondWith(
     caches.match(event.request)
       .then(response => {
-        return response || fetch(event.request);
+        // Agar cache mein hai, to wohi wapas karein
+        if (response) {
+          return response;
+        }
+        // Agar cache mein nahi hai, to network se laane ki koshish karein
+        return fetch(event.request);
       })
   );
 });
